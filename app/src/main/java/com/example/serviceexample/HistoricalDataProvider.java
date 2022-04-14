@@ -25,6 +25,7 @@ public class HistoricalDataProvider extends ContentProvider {
 
     static final String ID = "id";
     static final String CLOSE = "close";
+    static final String STOCKNAME = "stockName";
     static final String VOLUME = "volume";
 
     private static HashMap<String, String> HISTORY_PROJECTION_MAP;
@@ -48,9 +49,11 @@ public class HistoricalDataProvider extends ContentProvider {
     static final int DATABASE_VERSION = 1;
     static final String CREATE_DB_TABLE =
             " CREATE TABLE " + TABLE_NAME +
-                    " (id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                    " (stockName VARCHAR(30)," +
+                    " id INTEGER NOT NULL, " +
                     " close DECIMAL(5,3) NOT NULL, " +
-                    " volume DECIMAL(10,1) NOT NULL);";
+                    " open DECIMAL(5,3) NOT NULL, " +
+                    "PRIMARY KEY (stockName, id));";
 
 
     // helper class creates repo
