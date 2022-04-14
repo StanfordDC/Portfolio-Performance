@@ -1,124 +1,92 @@
 package com.example.serviceexample;
 
 import android.app.Activity;
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.database.Cursor;
-import android.net.Uri;
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
+import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 
-import com.example.serviceexample.*;
+import androidx.core.content.ContextCompat;
 
-public class MainActivity extends AppCompatActivity{
+public class ViewBuilder {
+    public static void CreateStockRow(Context context, String stockName, String annualizedReturn, String annualizedVolatility, Context context_button){
+        // Find the table on activitymain.xml
+        TableLayout table = (TableLayout) ((Activity)context).findViewById(R.id.tableLayout);
 
-    private Button start, calc;
-    private EditText ticker;
+        // Create a new row for the table
+        TableRow row = new TableRow(context);
+        row.setTag(stockName);
 
-    //    Uri CONTENT_URI = Uri.parse("content://com.example.serviceexample.HistoricalDataProvider/history");
-    private BroadcastReceiver stockBroadcastReceiver;
-
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        // set up layout
-        setContentView(R.layout.activitymain);
-
-        start = (Button) findViewById(R.id.start_button);
-        calc = (Button) findViewById(R.id.calc_button);
-        ticker = (EditText) findViewById(R.id.edit_ticker);
-
-        // Start BroadcastReceiver
-        stockBroadcastReceiver = new StockBroadcastReceiver(new Handler(Looper.getMainLooper()));
-
-        // start service, pass ticker info via an intent
-
-        // Initialise Table with data already inside the database
-        // Create String Array of 1 Location to place String
-        String[] columnNames = new String[1];
-        columnNames[0] = "distinct stockName";
-
-        /**
-         * getContentResolver() is method of class android.content.Context, to call it you need an instance of Context (e.g. Activity or Service)
-         * A Cursor is used to provide read access to the result set from our database query
-         */
-        Cursor cursor = getContentResolver().query(HistoricalDataProvider.CONTENT_URI, columnNames, null, null, null);
-        if(cursor.moveToFirst()){
-            while(!cursor.isAfterLast()){
-                String stockName = cursor.getString(cursor.getColumnIndexOrThrow("stockName"));
-                // Invoke ViewBuilder.java
-                ViewBuilder.CreateStockRow(this, stockName, "NA", "NA", this);
-                cursor.moveToNext();
-            }
-        }
-
-        // When click on the start_button aka "Download" button
-        start.setOnClickListener(new View.OnClickListener() {
+        // Create a delete button to facilitate deleting stocks
+        Button button = new Button(context_button);
+        button.setText("Delete");
+        button.setTag(stockName);
+        button.getBackground().setColorFilter(ContextCompat.getColor(context, R.color.off_white), PorterDuff.Mode.MULTIPLY);
+        button.setTextColor(ContextCompat.getColor(context, R.color.design_default_color_error));
+        button.setLayoutParams(new
+                TableRow.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT));
+        button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                try {
-                    InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-                    imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
-                } catch (Exception e) {
-                    Log.e("input",e.getMessage());
-                }
+                TableLayout tableLayout = (TableLayout) view.getParent().getParent();
+                TableRow tableRow = (TableRow) view.getParent();
+                tableLayout.removeView(tableRow);
+                context.getContentResolver().delete(HistoricalDataProvider.CONTENT_URI, "stockName=?", new String[] { (String) view.getTag() });
 
-                // Used to route intents of type "PERFORMANCE_CALCULATED" to stockBroadcastReceiver
-                registerReceiver(stockBroadcastReceiver, new IntentFilter("DOWNLOAD_COMPLETE"));
-
-                Intent intent = new Intent(getApplicationContext(), DownloadService.class);
-
-                intent.putExtra("ticker", String.valueOf(ticker.getText()));
-                startService(intent);
+                Toast.makeText(context, "Deleting stock: " + view.getTag(), Toast.LENGTH_SHORT).show();
             }
         });
 
-        // register broadcast receiver to get informed that data is downloaded so that we can calc
+        TableRow.LayoutParams stocklp = new TableRow.LayoutParams(
+                TableRow.LayoutParams.WRAP_CONTENT,
+                TableRow.LayoutParams.WRAP_CONTENT,
+                (float) 0.3
+        );
 
-        calc.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+        // Add other columns to our row
+        TextView stock = new TextView(context);
+        stock.setLayoutParams(stocklp);
+        stock.setText(stockName);
+        stock.setGravity(Gravity.CENTER);
+        row.addView(stock);
 
-                // Used to route intents of type "PERFORMANCE_CALCULATED" to stockBroadcastReceiver
-                registerReceiver(stockBroadcastReceiver, new IntentFilter("PERFORMANCE_CALCULATED"));
-                Intent intent = new Intent(getApplicationContext(), PerformanceService.class);
-                startService(intent);
-            }
-        });
+        TextView annualizedReturnView = new TextView(context);
+        TableRow.LayoutParams annualizedReturnlp = new TableRow.LayoutParams(
+                TableRow.LayoutParams.WRAP_CONTENT,
+                TableRow.LayoutParams.WRAP_CONTENT,
+                (float) 0.35
+        );
+        annualizedReturnView.setLayoutParams(annualizedReturnlp);
+        annualizedReturnView.setText(annualizedReturn);
+        annualizedReturnView.setGravity(Gravity.CENTER);
+        row.addView(annualizedReturnView);
+
+        TextView annualizedVolatilityView = new TextView(context);
+        TableRow.LayoutParams annualizedVolatilitylp = new TableRow.LayoutParams(
+                TableRow.LayoutParams.WRAP_CONTENT,
+                TableRow.LayoutParams.WRAP_CONTENT,
+                (float) 0.35
+        );
+        annualizedVolatilityView.setLayoutParams(annualizedVolatilitylp);
+        annualizedVolatilityView.setText(annualizedVolatility);
+        annualizedVolatilityView.setGravity(Gravity.CENTER);
+        row.addView(annualizedVolatilityView);
+        row.addView(button);
+
+        table.addView(row);
     }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-
-    }
-
-    @Override
-    protected void onDestroy(){
-        super.onDestroy();
-        unregisterReceiver(stockBroadcastReceiver);
-    }
-
-
 }
