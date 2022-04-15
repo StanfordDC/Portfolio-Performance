@@ -17,10 +17,6 @@ Other than the above basic functionalities, the following are the extra quality 
 
 When an input ticker is invalid or empty, an error popup shows up on the corresponding text box.
 
-- **Data Persistence:**
-
-For power and computation efficiency, data for previously fetched tickers will not be redownloaded.
-
 - **Error Prevention:**
 
 The `Calculate` button will be inactive until the data for the ticker has been downloaded and persisted into the database.
