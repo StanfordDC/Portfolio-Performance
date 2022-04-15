@@ -30,7 +30,7 @@ The `Calculate` button will be inactive until the data for the ticker has been d
 Each ticker is assigned a thread for its performance metrics calculation.
 
 ## How to run
-1. Clone the repository on your local computer
+1. Clone the repository on local computer
 2. Open the repository on Android Studio
 3. Run the code and display using an emulator
 
