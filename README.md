@@ -1,6 +1,6 @@
 # Portfolio-Performance
 
-An Android application for stocks portfolio performance tracker built with Java 
+Android application for stocks portfolio performance tracker built with Java 
 
 ## Usage Overview
 User can input up to five stock tickers, and the relevant data between *July 1 2021, 00:00:01 to Dec 31 2021, 23:59:59* is gathered from [Finnhub](https://finnhub.io).
