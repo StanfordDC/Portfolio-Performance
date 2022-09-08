@@ -1,4 +1,4 @@
-# Portfolio-Performance
+# Portfolio Performance
 
 Android application for stocks portfolio performance tracker built with Java 
 
